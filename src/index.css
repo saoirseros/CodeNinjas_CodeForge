@@ -1,0 +1,4 @@
+/* These three lines are necessary to inject Tailwind CSS utility classes into your app. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
