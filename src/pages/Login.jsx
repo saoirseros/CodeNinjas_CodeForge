@@ -35,7 +35,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen w-full flex bg-cover bg-center bg-no-repeat m-0 p-0"
+    style={{ backgroundImage: "url('/src/assets/dsu1.png')" }}>
+
       <div className="max-w-md w-full p-8 space-y-8 bg-white shadow-lg rounded-lg border border-gray-200">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-primary">
           {isLogin ? 'Sign in to Campus Connect' : 'Create Your Student Account'}

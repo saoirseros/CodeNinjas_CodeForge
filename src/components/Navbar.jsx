@@ -21,6 +21,8 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Clubs', path: '/clubs' },
+    { name: 'Events', path: '/events' },
+    { name: 'Departments', path: '/departments' },
     { name: 'Marketplace', path: '/marketplace' },
     { name: 'Lost & Found', path: '/lost-found' },
     { name: 'Chatroom', path: '/chatroom' },
@@ -28,7 +30,8 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-10 flex flex-col sm:flex-row items-center justify-between p-4 bg-indigo-700 shadow-lg">
+    <nav className="sticky top-0 z-[50] flex flex-col sm:flex-row items-center justify-between p-4 bg-indigo-700 shadow-lg">
+
       
       {/* Logo/Brand */}
       <div className="text-2xl font-extrabold text-white mb-3 sm:mb-0">

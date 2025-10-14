@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth'; // Added signOut for Navbar
 import { auth, db, rtdb } from './firebase'; // Ensure all services are imported
+import  Chatbot from './components/chatbot/Chatbot'; // Import Chatbot component
+ 
 
 // === Components & Pages ===
 import Login from './pages/Login';
@@ -9,6 +11,8 @@ import Navbar from './components/Navbar';
 // Placeholder Pages (You need to create these files in src/pages/)
 import Home from './pages/Home'; 
 import Clubs from './pages/Clubs';
+import Events from './pages/Events';
+import Department from './pages/Department'
 import Marketplace from './pages/Marketplace';
 import LostFound from './pages/LostFound';
 import Suggestions from './pages/Suggestions';
@@ -48,7 +52,7 @@ const App = () => {
   }, []);
 
   return (
-    // Pass Auth state via context
+    <>
     <AuthContext.Provider value={{ currentUser, loading }}>
       <Router>
         {/* Navbar is visible only when a user is logged in */}
@@ -62,17 +66,22 @@ const App = () => {
             {/* Protected Routes (Require Login) */}
             <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
+            <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+            <Route path="/departments" element={<ProtectedRoute><Department /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
             <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
             <Route path="/chatroom" element={<ProtectedRoute><Chatroom /></ProtectedRoute>} />
-
+            
             {/* Fallback for undefined routes */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </Router>
     </AuthContext.Provider>
+    {currentUser && <Chatbot />}
+    </>
+  
   );
 };
 

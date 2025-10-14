@@ -1,13 +1,14 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { get, getDatabase } from "firebase/database"; // For Realtime DB (Chatroom)
+import { getAuth } from "firebase/auth"; // Used for Login/Signup/Logout
+import { getFirestore } from "firebase/firestore"; // Used for Events, Marketplace, Lost & Found
+import { getDatabase } from "firebase/database"; // Used for Realtime DB (Chatroom)
 
-// IMPORTANT: Replace these placeholders with your actual Firebase project config 
-// You must get these values from your Firebase Console's Project Settings (Web App)
+// IMPORTANT: Replace these dummy strings with your actual Firebase project config values
+// Use the real values you identified earlier.
 const firebaseConfig = {
-  apiKey: "AIzaSyDRgC9tMKgybDKvH5Kj3ztiPnU_QA9zbiU",
+  apiKey: "AIzaSyDRgC9tMKgybDKvH5Kj3ztiPnU_QA9zbiU", // REPLACE THIS WITH YOUR REAL KEY
   authDomain: "campus-connect-hack.firebaseapp.com",
+  databaseURL: "https://campus-connect-hack-default-rtdb.firebaseio.com", // REPLACE THIS WITH YOUR REAL RTDB URL
   projectId: "campus-connect-hack",
   storageBucket: "campus-connect-hack.firebasestorage.app",
   messagingSenderId: "497826115749",
@@ -18,75 +19,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Services and Export
-export const auth = getAuth(app);    // For Login/Signup
-export const db = getFirestore(app); // For Firestore (Events, Market, L&F)
-export const rtdb = getDatabase(app); // For Realtime DB (Chatroom)
-
-//collection ref
-
-const colRef = collection(db, 'events');
-
-//get collection data
-
-getDocs(colRef)
-    .then((snapshot) => {
-        let events = []
-        snapshot.docs.forEach((doc) => {
-            events.push({ ...doc.data(), id:doc.id })
-        })
-        console.log(events);
-    })
-    .catch(err =>{
-        console.log(err.message);
-    })
-
-    //signing users up
-    const signupForm = document.querySelector('.signup');
-    signupForm.addEventListener('submit', (e) =>{
-        e.preventDefault();
-        
-        const email = signupForm.email.value;
-        const password = signupForm.password.value;
-        
-        createUserWithEmailAndPassword(auth, email, password)
-          .then((cred) =>{
-            console.log('user created:', cred.user);
-            signupForm.reset();
-        })
-            .catch((err) =>{
-            console.log(err.message);
-            })
-    })
-
-    //logging out
-    const logoutButton = document.querySelector('.logout');
-    logoutButton.addEventListener('click', () =>{
-        signOut(auth).then(() =>{
-            console.log('the user signed out'); 
-        }).catch((err) =>{
-            console.log(err.message);
-        })
-    })
-
-    //logging in
-    const loginForm = document.querySelector('.login');
-    loginForm.addEventListener('submit', (e) =>{
-        e.preventDefault();
-
-        const email = loginForm.email.value
-        const password = loginForm.password.value
-
-        signInWithEmailAndPassword(auth, email, password)
-        .then((cred) =>{
-            console.log('user logged in:', cred.user);
-            loginForm.reset();
-        })
-        .catch((err) =>{
-            console.log(err.message);
-        })
-    })
-
-    //subscribing to auth changes
-    onAuthStateChanged(auth, (user) =>{
-        console.log('user status changed:', user);
-    })
+export const auth = getAuth(app);// Exported for use in Login.jsx and Navbar.jsx
+export const db = getFirestore(app); // Exported for use in Marketplace, Home, Clubs, etc.
+export const rtdb = getDatabase(app); // Exported for use in Chatroom.jsx
