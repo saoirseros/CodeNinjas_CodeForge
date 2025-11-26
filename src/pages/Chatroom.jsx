@@ -8,31 +8,29 @@ const Chatroom = () => {
   const [username, setUsername] = useState('AnonStudent');
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to the latest message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    // Set a basic username from the Firebase Auth email if available
+    
     if (auth.currentUser && auth.currentUser.email) {
       setUsername(auth.currentUser.email.split('@')[0] || 'CampusUser');
     }
   }, []);
 
   useEffect(() => {
-    // 1. Get a reference to the 'messages' path in the Realtime Database
+    
     const messagesRef = ref(rtdb, 'messages');
     
-    // 2. Query to load only the last 50 messages for performance
+    
     const messagesQuery = query(messagesRef, limitToLast(50));
 
-    // 3. Set up the real-time listener
+    
     const unsubscribe = onValue(messagesQuery, (snapshot) => {
       const data = snapshot.val();
       const loadedMessages = [];
       
-      // Convert the object of messages into an array
       if (data) {
         for (let id in data) {
           loadedMessages.push({ id, ...data[id] });
@@ -40,15 +38,12 @@ const Chatroom = () => {
       }
       setMessages(loadedMessages);
       
-      // Scroll after messages are updated
       setTimeout(scrollToBottom, 100); 
 
     }, (error) => {
       console.error("Realtime DB error:", error);
-      // Handle error display if necessary
     });
 
-    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, [rtdb]);
 
@@ -63,7 +58,6 @@ const Chatroom = () => {
       senderId: auth.currentUser?.uid || 'anonymous'
     };
 
-    // Push the new message to the Realtime Database
     const messagesRef = ref(rtdb, 'messages');
     push(messagesRef, messagePayload)
       .then(() => {
@@ -82,7 +76,6 @@ const Chatroom = () => {
         💬 Campus Chatroom
       </h1>
 
-      {/* Message Display Area */}
       <div className="flex-1 overflow-y-auto space-y-4 p-3 bg-gray-50 rounded-lg mb-4">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${isMyMessage(msg.senderId) ? 'justify-end' : 'justify-start'}`}>
@@ -103,11 +96,11 @@ const Chatroom = () => {
             </div>
           </div>
         ))}
-        {/* Scroll reference point */}
+        
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input Form */}
+     
       <form onSubmit={sendMessage} className="flex space-x-3">
         <input
           type="text"
