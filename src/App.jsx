@@ -1,39 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth'; // Added signOut for Navbar
-import { auth, db, rtdb } from './firebase'; // Ensure all services are imported
-import  Chatbot from './components/chatbot/Chatbot'; // Import Chatbot component
- 
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 
-// === Components & Pages ===
+import Chatbot from './components/chatbot/Chatbot';
+
+// Pages & Components
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
-// Placeholder Pages (You need to create these files in src/pages/)
-import Home from './pages/Home'; 
+import Home from './pages/Home';
 import Clubs from './pages/Clubs';
 import Events from './pages/Events';
-import Department from './pages/Department'
+import Department from './pages/Department';
 import Marketplace from './pages/Marketplace';
 import LostFound from './pages/LostFound';
 import Suggestions from './pages/Suggestions';
 import Chatroom from './pages/Chatroom';
 
-// --- AUTH CONTEXT SETUP (FOR EASIER STATE MANAGEMENT) ---
-// Note: In a real app, this would be separate, but here we keep it simple.
+// --- AUTH CONTEXT ---
 const AuthContext = React.createContext({ currentUser: null, loading: true });
 
-// --- Protected Route Component ---
+// --- Protected Route ---
 const ProtectedRoute = ({ children }) => {
   const { currentUser, loading } = React.useContext(AuthContext);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen text-2xl font-semibold text-gray-700">Loading Campus Connect...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-950 text-2xl font-semibold text-slate-200">
+        Loading Campus Connect...
+      </div>
+    );
   }
-  // If not logged in, redirect to the login page
+
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
-  // If logged in, render the requested component
+
   return children;
 };
 
@@ -42,46 +44,105 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Setup Auth State Listener
+  // Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
-    return unsubscribe; // Cleanup subscription
+    return unsubscribe;
   }, []);
 
   return (
-    <>
     <AuthContext.Provider value={{ currentUser, loading }}>
-      <Router>
-        {/* Navbar is visible only when a user is logged in */}
-        {currentUser && <Navbar />} 
-        
-        <main className="p-4 sm:p-6 lg:p-8">
-          <Routes>
-            {/* Public Route */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected Routes (Require Login) */}
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
-            <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
-            <Route path="/departments" element={<ProtectedRoute><Department /></ProtectedRoute>} />
-            <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
-            <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
-            <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
-            <Route path="/chatroom" element={<ProtectedRoute><Chatroom /></ProtectedRoute>} />
-            
-            {/* Fallback for undefined routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </Router>
+      {/* Global dark background so no white edges */}
+      <div className="min-h-screen bg-slate-950 text-slate-50">
+        <Router>
+          {/* Navbar only when logged in */}
+          {currentUser && <Navbar />}
+
+          {/* Main content – no white background, just spacing on top */}
+          <main className="pt-4 sm:pt-6 lg:pt-8">
+            <Routes>
+              {/* Public */}
+              <Route path="/login" element={<Login />} />
+
+              {/* Protected */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/clubs"
+                element={
+                  <ProtectedRoute>
+                    <Clubs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/events"
+                element={
+                  <ProtectedRoute>
+                    <Events />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/departments"
+                element={
+                  <ProtectedRoute>
+                    <Department />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/marketplace"
+                element={
+                  <ProtectedRoute>
+                    <Marketplace />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/lost-found"
+                element={
+                  <ProtectedRoute>
+                    <LostFound />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/suggestions"
+                element={
+                  <ProtectedRoute>
+                    <Suggestions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chatroom"
+                element={
+                  <ProtectedRoute>
+                    <Chatroom />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </Router>
+
+        {/* Floating chatbot bubble on dark bg */}
+        {currentUser && <Chatbot />}
+      </div>
     </AuthContext.Provider>
-    {currentUser && <Chatbot />}
-    </>
-  
   );
 };
 
