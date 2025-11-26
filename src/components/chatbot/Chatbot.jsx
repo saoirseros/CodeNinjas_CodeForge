@@ -79,7 +79,7 @@ Rules:
     setIsLoading(true);
     setError(null);
 
-    const apiKey = "AIzaSyBrLYjrro6IUDBdP6qKrF1t4va4GRvOSRg"; // TODO: replace with your real Gemini API key
+    const apiKey = "YOUR-API-KEY"; // TODO: replace with your real Gemini API key
     const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     
