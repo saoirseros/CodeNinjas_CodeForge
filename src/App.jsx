@@ -16,6 +16,8 @@ import Marketplace from './pages/Marketplace';
 import LostFound from './pages/LostFound';
 import Suggestions from './pages/Suggestions';
 import Chatroom from './pages/Chatroom';
+import Profile from "./pages/Profile";
+
 
 // --- AUTH CONTEXT ---
 const AuthContext = React.createContext({ currentUser: null, loading: true });
@@ -132,6 +134,9 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,30 +1,68 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./Chatbot.css";
+// If you're fully on Tailwind, you can remove this next line.
+// import "./Chatbot.css";
 
-// ===== CHATBOT ICON =====
+// ===== CHATBOT ICON (SVG, no material icons) =====
 const ChatbotIcon = () => (
-  <span className="material-symbols-rounded chatbot-icon">smart_toy</span>
-);
-
-// ===== CHAT MESSAGE =====
-const ChatMessage = ({ chat, isTyping }) => (
-  <div
-    className={`chatbot-message ${
-      chat.role === "model" ? "chatbot-bot-message" : "chatbot-user-message"
-    }`}
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#a5b4fc"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="drop-shadow"
   >
-    {chat.role === "model" && <ChatbotIcon />}
-    <div className="chatbot-message-text">
-      {isTyping ? (
-        <div className="chatbot-typing-indicator">typing...</div>
-      ) : (
-        chat.parts.map((part, i) => <span key={i}>{part.text}</span>)
-      )}
-    </div>
-  </div>
+    <rect x="3" y="11" width="18" height="10" rx="2" />
+    <circle cx="8" cy="16" r="1" />
+    <circle cx="16" cy="16" r="1" />
+    <path d="M12 2v3" />
+    <path d="M17 4H7" />
+  </svg>
 );
 
-// ===== CHAT FORM =====
+// ===== SINGLE CHAT MESSAGE BUBBLE =====
+const ChatMessage = ({ chat, isTyping }) => {
+  const isBot = chat.role === "model";
+
+  return (
+    <div className={`flex mb-3 ${isBot ? "justify-start" : "justify-end"}`}>
+      {/* Bot avatar */}
+      {isBot && (
+        <div className="mt-auto mr-2 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/80 border border-indigo-400/40 shadow-[0_0_15px_rgba(129,140,248,0.5)]">
+          <ChatbotIcon />
+        </div>
+      )}
+
+      {/* Bubble */}
+      <div
+        className={`max-w-xs sm:max-w-sm p-3 rounded-2xl shadow-lg transition-all backdrop-blur-md border text-sm
+          ${
+            isBot
+              ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-400/40 shadow-indigo-500/40"
+              : "bg-slate-800/70 text-slate-100 border-slate-700"
+          }
+        `}
+      >
+        <div className="text-xs opacity-70 mb-1">
+          {isBot ? "Campus Connect Bot" : "You"}
+        </div>
+
+        <div className="leading-relaxed">
+          {isTyping ? (
+            <div className="italic opacity-80 text-xs">typing…</div>
+          ) : (
+            chat.parts.map((part, i) => <span key={i}>{part.text}</span>)
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== INPUT FORM =====
 const ChatForm = ({ chatHistory, setChatHistory, setIsLoading, setError }) => {
   const inputRef = useRef();
   const [inputValue, setInputValue] = useState("");
@@ -41,8 +79,10 @@ Rules:
     setIsLoading(true);
     setError(null);
 
-    const apiKey = "AIzaSyDhXKXT1my5WYvx5tx-fozEgrjtP8VUJC8"; // <-- Replace with your Gemini API key
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+    const apiKey = "AIzaSyBrLYjrro6IUDBdP6qKrF1t4va4GRvOSRg"; // TODO: replace with your real Gemini API key
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    
 
     const payload = {
       contents: history,
@@ -65,7 +105,7 @@ Rules:
       const botMessage = data.candidates?.[0]?.content;
 
       if (botMessage) {
-        // Remove "*Events*" if present
+        // Optional: clean "*Events*" prefix if present
         botMessage.parts.forEach((part) => {
           part.text = part.text.replace(/^(\\?Events\?:?\s*)/i, "").trim();
         });
@@ -95,13 +135,13 @@ Rules:
   };
 
   return (
-    <form className="chatbot-chat-form" onSubmit={handleFormSubmit}>
+    <form className="flex mt-4 space-x-3" onSubmit={handleFormSubmit}>
       <textarea
         ref={inputRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Enter a message..."
-        className="chatbot-message-input"
+        placeholder="Ask Campus Connect anything…"
+        className="flex-1 p-3 rounded-xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none min-h-[48px] max-h-32"
         required
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
@@ -112,16 +152,22 @@ Rules:
       />
       <button
         type="submit"
-        className="material-symbols-rounded"
         disabled={!inputValue.trim()}
+        className="flex items-center justify-center px-5 py-3 rounded-xl font-semibold text-slate-950
+          bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400
+          shadow-[0_0_18px_rgba(168,85,247,0.7)]
+          hover:shadow-[0_0_26px_rgba(236,72,153,0.9)]
+          hover:translate-y-[1px] active:translate-y-[2px]
+          transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        arrow_upward
+        {/* Real arrow icon, no text name */}
+        <span className="text-xl leading-none">➤</span>
       </button>
     </form>
   );
 };
 
-// ===== MAIN CHATBOT COMPONENT =====
+// ===== MAIN CHATBOT POPUP =====
 const Chatbot = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -135,41 +181,86 @@ const Chatbot = () => {
     }
   }, [chatHistory, isLoading]);
 
-  const toggleChat = () => setIsChatOpen(!isChatOpen);
+  const toggleChat = () => setIsChatOpen((prev) => !prev);
 
   return (
-    <div className="chatbot-wrapper">
+    <div className="fixed bottom-6 right-6 z-50">
+      {/* Neon blobs behind popup when open */}
+      {isChatOpen && (
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-24 -right-10 h-44 w-44 bg-indigo-500/30 blur-3xl rounded-full" />
+          <div className="absolute bottom-0 -left-10 h-40 w-40 bg-pink-500/30 blur-3xl rounded-full" />
+        </div>
+      )}
+
       {isChatOpen ? (
-        <div className="chatbot-container">
-          <div className="chatbot-popup">
-            <div className="chatbot-header">
-              <div className="chatbot-header-info">
-                <ChatbotIcon />
-                <h2 className="chatbot-logo-text">Campus Connect</h2>
+        <div className="relative w-[350px] sm:w-[380px]">
+          <div className="rounded-3xl p-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+            <div className="bg-slate-950/90 backdrop-blur-xl rounded-[1.5rem] p-4 border border-slate-800 flex flex-col h-[480px]">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/80 border border-indigo-400/40 shadow-[0_0_15px_rgba(129,140,248,0.5)]">
+                    <ChatbotIcon />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-transparent bg-gradient-to-r from-indigo-300 to-pink-300 bg-clip-text drop-shadow-[0_0_14px_rgba(129,140,248,0.6)]">
+                      Campus Connect Assistant
+                    </h2>
+                    <p className="text-[11px] text-slate-400">
+                      Ask about clubs, marketplace, lost &amp; found, and more.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Close button – simple X, no material icon */}
+                <button
+                  onClick={toggleChat}
+                  className="text-slate-400 hover:text-slate-100 transition text-lg leading-none px-2"
+                >
+                  ×
+                </button>
               </div>
-              <button onClick={toggleChat} className="material-symbols-rounded">
-                close
-              </button>
-            </div>
 
-            <div className="chatbot-body" ref={chatBodyRef}>
-              <div className="chatbot-message chatbot-bot-message">
-                <ChatbotIcon />
-                <p className="chatbot-message-text">
-                  Hi there! 👋<br />
-                  How can I help you navigate Campus Connect today?
-                </p>
+              {/* Messages area */}
+              <div
+                className="flex-1 overflow-y-auto space-y-2 p-3 bg-slate-900/40 rounded-xl border border-slate-800 backdrop-blur-sm"
+                ref={chatBodyRef}
+              >
+                {/* Welcome message */}
+                <div className="flex justify-start mb-3">
+                  <div className="max-w-xs sm:max-w-sm p-3 rounded-2xl shadow-lg bg-slate-800/80 text-slate-100 border border-slate-700 text-sm">
+                    <div className="text-xs opacity-70 mb-1">
+                      Campus Connect Bot
+                    </div>
+                    <p>
+                      Hi there 👋
+                      <br />
+                      How can I help you navigate{" "}
+                      <span className="font-semibold">Campus Connect</span> today?
+                    </p>
+                  </div>
+                </div>
+
+                {chatHistory.map((chat, index) => (
+                  <ChatMessage key={index} chat={chat} />
+                ))}
+
+                {isLoading && (
+                  <ChatMessage
+                    chat={{ role: "model", parts: [{ text: "" }] }}
+                    isTyping
+                  />
+                )}
+
+                {error && (
+                  <div className="mt-2 text-xs text-red-400 bg-red-950/40 border border-red-700/60 rounded-lg p-2">
+                    {error}
+                  </div>
+                )}
               </div>
 
-              {chatHistory.map((chat, index) => (
-                <ChatMessage key={index} chat={chat} />
-              ))}
-
-              {isLoading && <ChatMessage chat={{ role: "model", parts: [{ text: "" }] }} isTyping />}
-              {error && <div className="chatbot-error-message">{error}</div>}
-            </div>
-
-            <div className="chatbot-footer">
+              {/* Input */}
               <ChatForm
                 chatHistory={chatHistory}
                 setChatHistory={setChatHistory}
@@ -180,11 +271,19 @@ const Chatbot = () => {
           </div>
         </div>
       ) : (
-        <div className="chatbot-launcher" onClick={toggleChat}>
-          <span className="material-symbols-rounded" style={{ fontSize: "32px" }}>
-            chat
-          </span>
-        </div>
+        // Floating launcher button
+        <button
+          onClick={toggleChat}
+          className="relative flex items-center justify-center h-14 w-14 rounded-full
+            bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
+            shadow-[0_0_25px_rgba(168,85,247,0.9)]
+            hover:shadow-[0_0_35px_rgba(236,72,153,1)]
+            hover:scale-105 active:scale-95
+            transition-all duration-200"
+        >
+          <span className="text-2xl">💬</span>
+          <span className="absolute -top-2 -right-2 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,1)]" />
+        </button>
       )}
     </div>
   );

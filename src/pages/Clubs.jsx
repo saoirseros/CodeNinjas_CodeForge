@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
-import { Users, Link as LinkIcon, Mail, Zap, Sparkles } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Clubs = () => {
   const [clubs, setClubs] = useState([]);
@@ -11,17 +10,24 @@ const Clubs = () => {
   useEffect(() => {
     const fetchClubs = async () => {
       try {
-        const clubsRef = collection(db, "clubs");
+        console.log('DB instance:', db);
+
+        const clubsRef = collection(db, 'clubs');
         const snapshot = await getDocs(clubsRef);
+
+        console.log('snapshot size:', snapshot.size);
 
         const list = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
+        console.log('mapped clubs list:', list);
+
         setClubs(list);
       } catch (err) {
-        setError(err.message || "Something went wrong.");
+        console.error('Error loading clubs:', err);
+        setError(err.message || 'Something went wrong while loading clubs.');
       } finally {
         setLoading(false);
       }
@@ -30,10 +36,10 @@ const Clubs = () => {
     fetchClubs();
   }, []);
 
-  const getInitials = (name = "") => {
+  const getInitials = (name = '') => {
     const trimmed = name.trim();
-    if (!trimmed) return "?";
-    const parts = trimmed.split(" ");
+    if (!trimmed) return '?';
+    const parts = trimmed.split(' ');
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (
       parts[0].charAt(0).toUpperCase() +
@@ -41,173 +47,193 @@ const Clubs = () => {
     );
   };
 
-  const neonColors = [
-    "from-cyan-400 to-blue-500",
-    "from-fuchsia-500 to-purple-600",
-    "from-green-400 to-emerald-500",
-    "from-yellow-400 to-amber-500",
-    "from-pink-400 to-rose-500",
+  const colors = [
+    'from-indigo-500 to-violet-500',
+    'from-pink-500 to-rose-500',
+    'from-emerald-400 to-teal-500',
+    'from-sky-400 to-indigo-500',
+    'from-amber-400 to-orange-500',
   ];
 
-  const getNeon = (index) => neonColors[index % neonColors.length];
-
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030014] text-slate-100">
-      {/* ------------------ ANIMATED BACKGROUND ------------------ */}
-      <style>{`
-        @keyframes moveLines {
-          from { transform: translateX(-200px); }
-          to { transform: translateX(200px); }
-        }
-        @keyframes pulseOrb {
-          0%,100% { transform: scale(1); opacity: 0.25; }
-          50% { transform: scale(1.3); opacity: 0.4; }
-        }
-        @keyframes floatUp {
-          0% { transform: translateY(0px); opacity: 0.15; }
-          50% { transform: translateY(-22px); opacity: 0.35; }
-          100% { transform: translateY(0px); opacity: 0.15; }
-        }
-      `}</style>
-
-      {/* Neon moving lines */}
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-40">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute h-px w-[120vw] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
-            style={{
-              top: `${i * 4}vh`,
-              animation: "moveLines 6s linear infinite",
-              animationDelay: `${i * 0.25}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Floating neon orbs */}
+    <div className="min-h-screen bg-slate-950 text-slate-50 relative overflow-hidden">
+      {/* Background anime/neon gradient orbs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-20 left-10 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl animate-[pulseOrb_8s_infinite]" />
-        <div className="absolute bottom-32 right-20 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl animate-[pulseOrb_10s_infinite]" />
-        <div className="absolute left-1/3 top-1/3 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl animate-[floatUp_7s_infinite]" />
+        <div className="absolute -top-32 -left-10 h-64 w-64 bg-indigo-500/30 blur-3xl rounded-full" />
+        <div className="absolute top-40 -right-16 h-72 w-72 bg-pink-500/25 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-1/3 h-56 w-56 bg-violet-500/20 blur-3xl rounded-full" />
       </div>
 
-      {/* ------------------ PAGE CONTENT ------------------ */}
-      <div className="max-w-6xl mx-auto px-4 py-14 relative z-10">
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-black/40 px-3 py-1 text-[11px] font-semibold text-cyan-300">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
-            Club System Interface
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-indigo-300 mb-2">
+              DSATM CAMPUS • CLUBS
+            </p>
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-300 via-violet-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(129,140,248,0.7)]">
+              Club Directory
+            </h1>
+            <p className="mt-3 text-sm md:text-base text-slate-300 max-w-2xl">
+              Explore all active clubs across campus – from coding and design to
+              music, art, and more. Find your tribe and start building something
+              legendary.
+            </p>
           </div>
 
-          <h1 className="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            Club Directory
-          </h1>
+          <div className="flex items-center gap-2 text-xs md:text-sm text-slate-300 bg-slate-900/70 border border-indigo-500/30 rounded-2xl px-4 py-3 backdrop-blur-xl shadow-[0_0_30px_rgba(79,70,229,0.25)]">
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <p>
+              <span className="font-semibold text-indigo-200">
+                {loading ? 'Syncing' : 'Live'}
+              </span>{' '}
+              with campus database
+            </p>
+          </div>
+        </header>
 
-          <p className="mt-2 max-w-xl text-sm text-cyan-100/80">
-            All student-led organizations connected in one neon network.  
-            Tap into their energy. Explore, join, collaborate.
-          </p>
-        </div>
-
+        {/* States */}
         {loading ? (
-          <p className="text-sm text-cyan-200">Loading clubs…</p>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className="rounded-3xl bg-slate-900/70 border border-slate-800/80 p-6 animate-pulse backdrop-blur-xl"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="h-14 w-14 rounded-full bg-slate-700" />
+                  <div className="flex-1">
+                    <div className="h-4 w-32 bg-slate-700 rounded-full mb-2" />
+                    <div className="h-3 w-20 bg-slate-800 rounded-full" />
+                  </div>
+                </div>
+                <div className="h-3 w-full bg-slate-800 rounded-full mb-2" />
+                <div className="h-3 w-3/4 bg-slate-800 rounded-full mb-5" />
+                <div className="h-9 w-full bg-slate-800 rounded-xl" />
+              </div>
+            ))}
+          </div>
         ) : error ? (
-          <p className="text-sm text-rose-400">Error: {error}</p>
+          <p className="text-center text-red-400 bg-red-950/40 border border-red-700/40 rounded-2xl py-4">
+            Error: {error}
+          </p>
         ) : clubs.length === 0 ? (
-          <p className="text-sm text-gray-400">No clubs found.</p>
+          <div className="text-center text-slate-300 bg-slate-900/70 border border-slate-800 rounded-3xl py-10 backdrop-blur-xl">
+            <p className="text-lg font-semibold mb-1">
+              No clubs found in Firestore.
+            </p>
+            <p className="text-sm text-slate-400">
+              Start by adding club documents in the <code>clubs</code> collection
+              to see them here in real time.
+            </p>
+          </div>
         ) : (
-          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {clubs.map((club, index) => {
-              const initials = getInitials(club.name);
-              const neon = getNeon(index);
+              const gradient = colors[index % colors.length];
 
               return (
-                <article
+                <div
                   key={club.id}
-                  className="relative flex flex-col rounded-2xl border border-cyan-500/20 bg-black/40 backdrop-blur-xl p-6 shadow-[0_0_40px_-10px_rgba(0,255,255,0.4)] transition hover:border-cyan-400 hover:shadow-[0_0_45px_0px_rgba(0,255,255,0.6)] hover:-translate-y-1"
+                  className="group relative"
                 >
-                  {/* Top glowing line */}
-                  <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+                  {/* Glowing gradient border wrapper */}
+                  <div
+                    className={`relative rounded-3xl p-[1px] bg-gradient-to-br ${gradient} shadow-[0_0_35px_rgba(79,70,229,0.45)] group-hover:shadow-[0_0_55px_rgba(236,72,153,0.6)] transition-shadow duration-300`}
+                  >
+                    <div className="h-full w-full rounded-[1.35rem] bg-slate-950/90 border border-slate-800/90 px-5 py-6 flex flex-col backdrop-blur-xl">
+                      <div className="flex items-start justify-between gap-3 mb-5">
+                        <div className="pr-2">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/70 border border-indigo-500/40 text-[10px] uppercase tracking-[0.18em] text-indigo-200 mb-3">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            {club.category || 'Campus Club'}
+                          </div>
 
-                  <div className="mb-6 flex items-start justify-between">
-                    {/* Left text */}
-                    <div className="pr-3">
-                      <h2 className="text-lg font-bold text-cyan-200 mb-1">
-                        {club.name}
-                      </h2>
+                          <h2 className="text-xl md:text-2xl font-bold text-slate-50 mb-1 leading-tight group-hover:text-indigo-100 transition-colors">
+                            {club.name}
+                          </h2>
 
-                      <p className="text-xs text-cyan-100/80 line-clamp-3">
-                        {club.description}
-                      </p>
-
-                      <div className="mt-3 space-y-1 text-[11px]">
-                        {club.contact && (
-                          <p className="flex items-center gap-1 text-cyan-200">
-                            <Mail className="h-3 w-3 text-cyan-300" />
-                            {club.contact}
+                          <p className="text-xs text-slate-400 mb-3">
+                            {club.tagline || 'Join, learn, build, and vibe with your people.'}
                           </p>
-                        )}
-
-                        {club["head name"] && (
-                          <p className="text-cyan-100">{club["head name"]}</p>
-                        )}
-
-                        {club["social media"] && (
-                          <p className="flex items-center gap-1 text-fuchsia-300">
-                            <LinkIcon className="h-3 w-3" />
-                            {club["social media"]}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Logo / initials avatar */}
-                    <div className="flex-shrink-0">
-                      {club.imageURL ? (
-                        <div className="relative h-14 w-14">
-                          <img
-                            src={club.imageURL}
-                            alt={club.name}
-                            className="h-14 w-14 rounded-full border border-cyan-300 object-cover shadow-lg shadow-cyan-500/30"
-                          />
                         </div>
-                      ) : (
-                        <div className="relative h-14 w-14">
+
+                        {/* Avatar with neon ring */}
+                        <div className="relative shrink-0">
                           <div
-                            className={`absolute inset-0 rounded-full bg-gradient-to-br ${neon} blur-md opacity-70`}
-                          />
-                          <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-black border border-cyan-400 text-lg font-bold text-white shadow-md shadow-cyan-500/40">
-                            {initials}
+                            className={`p-[2px] rounded-full bg-gradient-to-br ${gradient} shadow-[0_0_25px_rgba(129,140,248,0.7)] group-hover:scale-110 transition-transform duration-300`}
+                          >
+                            {club.imageURL ? (
+                              <img
+                                src={club.imageURL}
+                                alt={club.name}
+                                className="w-14 h-14 rounded-full object-cover border border-slate-900"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-slate-900 text-indigo-100 text-xl font-bold border border-slate-800">
+                                {getInitials(club.name)}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-slate-200 leading-relaxed mb-4 line-clamp-3">
+                        {club.description || 'No description added yet. Be the first to define the vibe of this club.'}
+                      </p>
+
+                      {/* Meta info */}
+                      <div className="mt-auto space-y-2 text-xs text-slate-300">
+                        <p>
+                          <span className="font-semibold text-indigo-200">Contact:</span>{' '}
+                          <span className="text-slate-100">
+                            {club.contact || 'Not available'}
+                          </span>
+                        </p>
+
+                        {club['head name'] && (
+                          <p className="flex items-center gap-1.5">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900/70 border border-slate-700 text-slate-200">
+                              Club Head
+                            </span>
+                            <span>{club['head name']}</span>
+                          </p>
+                        )}
+
+                        {club['social media'] && (
+                          <p className="text-[11px] text-indigo-200 truncate">
+                            <span className="opacity-80">Social:</span>{' '}
+                            <a
+                              href={club['social media']}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="underline underline-offset-2 hover:text-pink-300"
+                            >
+                              {club['social media']}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+
+                      {/* CTA button */}
+                      <button
+                        className="mt-4 w-full py-2.5 text-sm font-semibold rounded-xl
+                                   bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500
+                                   text-white shadow-[0_0_25px_rgba(129,140,248,0.8)]
+                                   hover:shadow-[0_0_35px_rgba(236,72,153,0.9)]
+                                   hover:translate-y-[1px] active:translate-y-[2px]
+                                   focus:outline-none focus:ring-2 focus:ring-indigo-300/70
+                                   transition-all duration-300"
+                      >
+                        View Details
+                      </button>
                     </div>
                   </div>
 
-                  {/* Footer: member count + button */}
-                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-cyan-500/20">
-                    <div className="flex items-center gap-2 text-[11px]">
-                      <div className="h-7 w-7 flex items-center justify-center rounded-xl bg-black border border-cyan-300">
-                        <Users className="h-3.5 w-3.5 text-cyan-300" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-cyan-200">
-                          {club.members_count
-                            ? `${club.members_count} members`
-                            : "Active members"}
-                        </p>
-                        <p className="text-[10px] text-cyan-100/70">
-                          {club.category || "Campus Club"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button className="rounded-xl bg-cyan-400 px-3 py-1.5 text-[11px] font-semibold text-slate-900 shadow-lg shadow-cyan-500/40 transition hover:bg-cyan-300">
-                      View Details
-                    </button>
-                  </div>
-                </article>
+                  {/* Tiny floating glow on hover */}
+                  <div className="pointer-events-none absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-20 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 blur-3xl transition-opacity duration-500" />
+                </div>
               );
             })}
           </div>

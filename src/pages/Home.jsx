@@ -298,13 +298,7 @@ const Home = () => {
             </div>
 
             {/* small angle image chip */}
-            <div className="absolute -left-6 bottom-4 hidden w-24 overflow-hidden rounded-2xl border border-slate-700 shadow-lg shadow-black/70 md:block">
-              <img
-                src="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&dpr=2&w=400"
-                alt="Campus at night"
-                className="h-full w-full object-cover"
-              />
-            </div>
+
           </div>
         </div>
       </section>
@@ -410,7 +404,7 @@ const Home = () => {
                     />
                   ) : (
                     <img
-                      src="https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&dpr=2&w=600"
+                      src="https://static.wixstatic.com/media/afa542_d0ede61bf9ac48b4b19afbcd691bfc5d~mv2.jpg/v1/fit/w_1008,h_624,q_90,enc_avif,quality_auto/afa542_d0ede61bf9ac48b4b19afbcd691bfc5d~mv2.jpg"
                       alt="Event banner"
                       className="h-full w-full object-cover transition group-hover:scale-105 group-hover:brightness-110"
                     />
@@ -492,7 +486,7 @@ const Home = () => {
                       />
                     ) : (
                       <img
-                        src="https://images.pexels.com/photos/1181396/pexels-photo-1181396.jpeg?auto=compress&dpr=2&w=500"
+                        src="https://static.wixstatic.com/media/afa542_6a9e819b27cf45969401adbca0b93f4f~mv2.jpg/v1/fill/w_816,h_1280,al_c,q_90/afa542_6a9e819b27cf45969401adbca0b93f4f~mv2.webp"
                         alt="Club"
                         className="h-full w-full object-cover transition group-hover:scale-105 group-hover:brightness-110"
                       />

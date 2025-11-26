@@ -452,16 +452,7 @@ const HomePage = () => {
                 </ul>
               </div>
 
-              <div className="rounded-3xl bg-slate-950/90 p-5 text-xs text-slate-300 shadow-[0_20px_60px_-40px_rgba(15,23,42,1)] border border-slate-800">
-                <p className="mb-2 font-semibold text-slate-50">
-                  Why this impresses judges 👀
-                </p>
-                <p>
-                  It feels like a real internal tool for students: live feed, success
-                  stories for social proof, and a guided form that encodes good
-                  behaviour. Dark, clean, and still very usable.
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
