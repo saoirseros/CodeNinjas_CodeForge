@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion'; // 👈 added
+import { motion } from 'framer-motion';
 
 // Icons
 const Calendar = ({ className }) => (
@@ -62,6 +62,20 @@ const Badge = ({ variant = 'default', children }) => {
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // RSVP / details modal state
+  const [rsvpOpen, setRsvpOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [rsvpData, setRsvpData] = useState({
+    name: '',
+    email: '',
+    branch: '',
+    year: '',
+    notes: '',
+  });
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpError, setRsvpError] = useState('');
+  const [rsvpSuccess, setRsvpSuccess] = useState('');
 
   // Dummy data fallback
   const dummyEvents = [
@@ -146,6 +160,58 @@ const Events = () => {
     'from-amber-400 to-orange-500',
   ];
 
+  const openRsvpModal = (event) => {
+    setSelectedEvent(event);
+    setRsvpData({
+      name: '',
+      email: '',
+      branch: '',
+      year: '',
+      notes: '',
+    });
+    setRsvpError('');
+    setRsvpSuccess('');
+    setRsvpOpen(true);
+  };
+
+  const handleRsvpChange = (e) => {
+    const { name, value } = e.target;
+    setRsvpData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRsvpSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedEvent) return;
+
+    setRsvpLoading(true);
+    setRsvpError('');
+    setRsvpSuccess('');
+
+    try {
+      await addDoc(collection(db, 'eventRegistrations'), {
+        eventId: selectedEvent.id,
+        eventTitle: selectedEvent.title || '',
+        ...rsvpData,
+        createdAt: serverTimestamp(),
+      });
+
+      setRsvpSuccess('You have successfully registered for this event!');
+      // Optionally auto-close after a short delay
+      // setTimeout(() => setRsvpOpen(false), 1500);
+    } catch (err) {
+      console.error('Error saving RSVP:', err);
+      setRsvpError('Failed to submit your details. Please try again.');
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
+  const closeRsvp = () => {
+    if (rsvpLoading) return;
+    setRsvpOpen(false);
+    setSelectedEvent(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 relative overflow-hidden">
       {/* Neon background blobs */}
@@ -156,7 +222,7 @@ const Events = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Header with slight motion */}
+        {/* Header */}
         <motion.header
           className="mb-10 text-center"
           initial={{ opacity: 0, y: -20 }}
@@ -285,6 +351,7 @@ const Events = () => {
                         {/* CTA Button */}
                         <div className="md:col-span-1 flex md:justify-end items-center">
                           <button
+                            onClick={() => openRsvpModal(event)}
                             className="w-full md:w-auto py-2.5 px-6 text-sm font-semibold rounded-xl
                                        bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500
                                        text-white shadow-[0_0_25px_rgba(129,140,248,0.8)]
@@ -320,10 +387,121 @@ const Events = () => {
               'events'
             </span>{' '}
             Firestore collection. If no data exists, sample events are shown for
-            demo.
+            demo. RSVPs are stored in{' '}
+            <span className="font-mono font-semibold text-pink-300">
+              'eventRegistrations'
+            </span>
+            .
           </p>
         </motion.div>
       </div>
+
+      {/* RSVP Modal */}
+      {rsvpOpen && selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="w-full max-w-md rounded-3xl p-[1px] bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 shadow-[0_0_35px_rgba(129,140,248,0.9)]"
+          >
+            <div className="bg-slate-950/95 rounded-[1.4rem] p-6 border border-slate-800">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-indigo-300 mb-1">
+                    RSVP FOR
+                  </p>
+                  <h3 className="text-lg font-bold text-slate-50">
+                    {selectedEvent.title}
+                  </h3>
+                </div>
+                <button
+                  onClick={closeRsvp}
+                  className="text-slate-400 hover:text-slate-200 text-sm"
+                  disabled={rsvpLoading}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-400 mb-4">
+                Fill in your details and we&apos;ll share them with the event
+                organizers.
+              </p>
+
+              {rsvpError && (
+                <div className="mb-3 text-xs text-red-300 bg-red-950/50 border border-red-600/60 rounded-lg px-3 py-2">
+                  {rsvpError}
+                </div>
+              )}
+
+              {rsvpSuccess && (
+                <div className="mb-3 text-xs text-emerald-300 bg-emerald-950/40 border border-emerald-500/70 rounded-lg px-3 py-2">
+                  {rsvpSuccess}
+                </div>
+              )}
+
+              <form className="space-y-3" onSubmit={handleRsvpSubmit}>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Your Name"
+                  value={rsvpData.name}
+                  onChange={handleRsvpChange}
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="College Email"
+                  value={rsvpData.email}
+                  onChange={handleRsvpChange}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    name="branch"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Branch (CSE, ECE, etc.)"
+                    value={rsvpData.branch}
+                    onChange={handleRsvpChange}
+                  />
+                  <input
+                    type="text"
+                    name="year"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Year (1st, 2nd, etc.)"
+                    value={rsvpData.year}
+                    onChange={handleRsvpChange}
+                  />
+                </div>
+
+                <textarea
+                  name="notes"
+                  rows="3"
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Any questions or notes for the organizers? (optional)"
+                  value={rsvpData.notes}
+                  onChange={handleRsvpChange}
+                />
+
+                <button
+                  type="submit"
+                  disabled={rsvpLoading}
+                  className="mt-2 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 shadow-[0_0_22px_rgba(129,140,248,0.9)] hover:shadow-[0_0_30px_rgba(236,72,153,0.9)] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                >
+                  {rsvpLoading ? 'Submitting...' : 'Submit Details'}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
